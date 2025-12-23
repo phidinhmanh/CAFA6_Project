@@ -12,7 +12,7 @@ class DataPaths:
 
         cls._registry.clear()
         # Only allow these specific data extensions
-        allowed_suffixes = {".obo", ".tsv", ".csv", ".parquet", ".txt"}
+        allowed_suffixes = {".obo", ".tsv", ".csv", ".parquet", ".txt", ".fasta"}
 
         # Search /kaggle/input and your current working directory
         search_dirs = [Path(root_path), Path.cwd()]
