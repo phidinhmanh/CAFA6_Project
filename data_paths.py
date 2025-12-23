@@ -49,5 +49,6 @@ class DataPaths:
         matches.sort(key=lambda p: len(p.name))
         return str(matches[0])
 
+    @classmethod
     def exists(cls, name: str) -> bool:
         return name in cls._registry
