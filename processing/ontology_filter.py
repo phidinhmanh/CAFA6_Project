@@ -46,7 +46,7 @@ class OntologyFilter(BaseStep):
     # LOGIC BLOCKS
     # ===============================
     def _load_ontology(self):
-        graph = obonet.read_obo(DataPaths.get("obo"))
+        graph = obonet.read_obo(DataPaths.get("obo-basic"))
         return {n: set(nx.descendants(graph, n)) for n in graph.nodes()}
 
     def _build_tax_rules(self):
@@ -107,7 +107,5 @@ class OntologyFilter(BaseStep):
 
     def _format(self, pid, preds):
         return [
-            f"{pid}\t{t}\t{s:.3f}\n"
-            for t, s in preds.items()
-            if s > self.min_score
+            f"{pid}\t{t}\t{s:.3f}\n" for t, s in preds.items() if s > self.min_score
         ]
