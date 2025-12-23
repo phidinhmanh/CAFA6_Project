@@ -46,7 +46,7 @@ class OntologyFilter(BaseStep):
     # LOGIC BLOCKS
     # ===============================
     def _load_ontology(self):
-        graph = obonet.read_obo(DataPaths.get("obo-basic"))
+        graph = obonet.read_obo(DataPaths.get("go-basic.obo"))
         return {n: set(nx.descendants(graph, n)) for n in graph.nodes()}
 
     def _build_tax_rules(self):

@@ -7,54 +7,46 @@ class DataPaths:
 
     @classmethod
     def autopath(cls, root_path="/kaggle/input", suffixes=None, refresh=False):
-        """
-        Scans the environment for data files while ignoring source code.
-        """
         if cls._scanned and not refresh:
             return cls
 
         cls._registry.clear()
-        # Define what we ARE looking for
-        valid_suffixes = set(suffixes or [".obo", ".tsv", ".csv", ".txt", ".parquet"])
-        # Define what we ARE NOT looking for
-        blacklist_ext = {".py", ".pyc", ".ipynb", ".sh", ".md"}
+        # Only allow these specific data extensions
+        allowed_suffixes = {".obo", ".tsv", ".csv", ".parquet", ".txt"}
 
-        # Search /kaggle/input and the current working directory
+        # Search /kaggle/input and your current working directory
         search_dirs = [Path(root_path), Path.cwd()]
 
         for base in search_dirs:
             if not base.exists():
                 continue
-
             for path in base.rglob("*"):
-                if path.is_file() and path.suffix.lower() not in blacklist_ext:
-                    if not suffixes or path.suffix.lower() in valid_suffixes:
-                        # Register by full filename and by stem (filename without .ext)
-                        cls._registry[path.name] = path.resolve()
-                        cls._registry[path.stem] = path.resolve()
+                # BLOCK: Ignore any python files or hidden folders
+                if path.suffix.lower() == ".py" or path.name.startswith("."):
+                    continue
+
+                if path.is_file() and path.suffix.lower() in allowed_suffixes:
+                    # Register by full filename (go-basic.obo) and stem (go-basic)
+                    cls._registry[path.name] = path.resolve()
+                    cls._registry[path.stem] = path.resolve()
 
         cls._scanned = True
         return cls
 
     @classmethod
     def get(cls, name: str) -> str:
-        """
-        Returns the absolute string path for a file.
-        """
-        # Priority 1: Exact match (best for 'go-basic.obo')
+        # Priority 1: Exact match (matches 'go-basic.obo' or 'go-basic')
         if name in cls._registry:
             return str(cls._registry[name])
 
-        # Priority 2: Substring match excluding Python files
+        # Priority 2: Safe substring match (filtering out any accidentally caught .py)
         matches = [p for k, p in cls._registry.items() if name in k]
 
         if not matches:
-            raise FileNotFoundError(f"No file found matching '{name}' in registry.")
+            raise FileNotFoundError(f"Could not find a data file matching '{name}'.")
 
-        if len(matches) > 1:
-            # Heuristic: pick the one with the shortest name (most likely the direct hit)
-            matches.sort(key=lambda p: len(p.name))
-
+        # Pick the shortest match (usually the most specific one)
+        matches.sort(key=lambda p: len(p.name))
         return str(matches[0])
 
     def exists(cls, name: str) -> bool:
