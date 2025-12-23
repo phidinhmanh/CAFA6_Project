@@ -61,3 +61,6 @@ class DataPaths:
             f"Could not find data file matching '{name}'. "
             f"Available files: {list(cls._registry.keys())[:10]}..."
         )
+
+    def exists(cls, name: str) -> bool:
+        return name in cls._registry
