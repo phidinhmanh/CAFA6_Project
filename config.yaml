@@ -1,0 +1,46 @@
+# Cấu hình data input
+data:
+  root: "/kaggle/input"
+
+# Các tham số chung
+top_go_terms: 10000
+top_predict: 1500
+
+# Pipeline thực thi
+pipeline:
+  # Bước 1: Feature Engineering
+  feature_engineering:
+    module: "features.sequence"
+    class: "SequenceProcessor"
+    params:
+      dimensions: 85
+
+  # Bước 2: Model (Dùng Wrapper vạn năng)
+  model:
+    module: "models.generic"
+    class: "SklearnWrapper"
+    params:
+      # Bạn muốn dùng thuật toán nào thì sửa ở đây
+      library: "sklearn.neighbors"
+      algorithm: "NearestNeighbors"
+      model_params:
+        n_neighbors: 7
+        metric: "cosine"
+        n_jobs: -1
+
+  # Bước 3: Ontology Filter
+  ontology_filter:
+    module: "processing.ontology_filter"
+    class: "OntologyFilter"
+    params:
+      min_score: 0.01
+      top_k: 1500
+      propagation_rounds: 3
+
+  # Bước 4: Merge kết quả
+  post_process:
+    module: "processing.merge"
+    class: "Merge"
+    params:
+      method: "max"
+    blast_path: "submission.tsv"

@@ -1,0 +1,16 @@
+[project]
+name = "protein-predict"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "biopython>=1.86",
+    "numpy",
+    "pandas",
+    "pyyaml",
+    "tqdm",
+    "obonet",
+    "networkx",
+    "scikit-learn",
+]
