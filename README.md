@@ -1,49 +1,74 @@
-# Protein Predict
+# Protein Function Prediction Pipeline
 
-## Overview
-This project provides a Python framework for protein prediction pipelines. It features an automated data path discovery system and a modular step-based architecture for processing tasks.
+A modular pipeline for [CAFA 6](https://www.kaggle.com/competitions/cafa-6-protein-function-prediction) protein function prediction.
 
-## Components
+## Quick Start
 
-### DataPaths (`data_paths.py`)
-A utility class designed to simplify file management, particularly useful in environments like Kaggle or local development where paths may vary.
+```bash
+# Install dependencies
+uv sync
 
-- **Auto-discovery**: Recursively scans directories (default: `/kaggle/input` or user home) to register files.
-- **Smart Resolution**: Retrieves file paths using exact names or unique substrings, eliminating the need for hardcoded absolute paths.
+# Run with mock data (5% sampled)
+uv run python light_debug.py
 
-### BaseStep (`models/base.py`)
-An abstract base class for defining pipeline steps.
-
-- **Context Awareness**: Steps operate on a shared `context` dictionary.
-- **Automatic Skipping**: Skips execution if the expected output keys (`produces`) are already present in the context.
-- **I/O Helpers**: Includes utility methods for reading and writing TSV files and managing input/output paths.
-
-## Usage
-
-### Managing Data Paths
-```python
-from data_paths import DataPaths
-
-# Initialize and scan for specific file types
-DataPaths.autopath(suffixes=[".fasta", ".tsv", ".csv"])
-
-# Get a file path (throws error if ambiguous or not found)
-input_file = DataPaths.get("dataset_v1.csv")
+# Run full pipeline (Kaggle or local)
+uv run python main.py
 ```
 
-### Creating a Pipeline Step
-```python
-from models.base import BaseStep
+## Project Structure
 
-class PredictionStep(BaseStep):
-    step_name = "ModelPrediction"
-    produces = ["prediction_scores"]
+```
+├── main.py                 # Full pipeline entry
+├── light_debug.py          # Debug with sampled data
+├── config.yaml             # Pipeline configuration
+├── data_paths.py           # Auto file discovery
+├── factory.py              # Dynamic step creation
+├── runner.py               # Pipeline executor
+├── features/
+│   └── sequence.py         # Sequence feature extraction
+├── models/
+│   ├── base.py             # Abstract base step
+│   └── generic.py          # Sklearn wrapper
+├── processing/
+│   ├── ontology_filter.py  # GO term filtering
+│   └── merge.py            # Result merging
+└── tmp_data/               # Sampled test data (5%)
+```
 
-    def execute(self) -> dict:
-        # Logic to run prediction
-        input_path = self.get_input_path()
-        
-        # Update context with results
-        self.set_ctx("prediction_scores", [0.95, 0.88])
-        return self.context
+## Pipeline Steps
+
+| Step | Class | Description |
+|------|-------|-------------|
+| 1 | `SequenceProcessor` | Extract sequence features |
+| 2 | `SklearnWrapper` | KNN prediction |
+| 3 | `OntologyFilter` | Taxonomy + GO propagation |
+| 4 | `Merge` | Combine results |
+
+## Configuration
+
+Edit `config.yaml` to modify:
+- Model parameters (`n_neighbors`, `metric`)
+- Filter thresholds (`min_score`, `top_k`)
+- File paths
+
+## Data Files
+
+The pipeline expects these files (auto-discovered via `DataPaths`):
+
+| File | Description |
+|------|-------------|
+| `train_sequences.fasta` | Training sequences |
+| `train_terms.tsv` | GO term annotations |
+| `train_taxonomy.tsv` | Taxon mappings |
+| `go-basic.obo` | Gene Ontology |
+| `testsuperset.fasta` | Test sequences |
+| `testsuperset-taxon-list.tsv` | Test taxon mappings |
+
+## Local Testing
+
+Generate 5% sampled data for quick testing:
+
+```bash
+# Data is auto-sampled from Downloads/cafa-6-protein-function-prediction
+uv run python sample_real_data.py
 ```
