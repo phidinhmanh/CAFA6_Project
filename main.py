@@ -19,8 +19,8 @@ def main():
     context = {}
 
     # Nếu đã có submission → inject luôn
-    if DataPaths.exists("submission"):
-        context["prediction_path"] = DataPaths.get("submission")
+    if DataPaths.exists("model_output.tsv"):
+        context["prediction_path"] = DataPaths.get("model_output.tsv")
         print(">>> Found existing submission, will skip model steps")
 
     runner = PipelineRunner(config, context)

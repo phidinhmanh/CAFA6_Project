@@ -28,6 +28,14 @@ pipeline:
         metric: "cosine"
         n_jobs: -1
 
+  post_process:
+    module: "processing.merge"
+    class: "Merge"
+    params:
+      method: "max"
+      merge_path: "submission.tsv"
+    extra_predictions:
+      - "submission.tsv"   # BLAST
   # Bước 3: Ontology Filter
   ontology_filter:
     module: "processing.ontology_filter"
@@ -38,11 +46,3 @@ pipeline:
       propagation_rounds: 3
 
   # Bước 4: Merge kết quả
-  post_process:
-    module: "processing.merge"
-    class: "Merge"
-    params:
-      method: "max"
-      merge_path: "submission.tsv"
-    extra_predictions:
-      - "submission.tsv"   # BLAST

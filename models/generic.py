@@ -9,7 +9,7 @@ from data_paths import DataPaths
 
 class SklearnWrapper(BaseStep):
     step_name = "SklearnModel"
-    produces = ["prediction_path"]
+    produces = {}
 
     def __init__(self, library, algorithm, model_params=None):
         self.library = library
@@ -20,7 +20,18 @@ class SklearnWrapper(BaseStep):
         self.model_cls = getattr(module, algorithm)
         self.model = self.model_cls(**self.model_params)
 
+    def _already_done(self):
+        if self.get_ctx("prediction_path"):
+            return True
+        return False
+
     def execute(self):
+        if self._already_done():
+            print(
+                f"--- SKIP STEP (cached): {self.step_name or self.__class__.__name__}"
+            )
+            return self.context
+
         X_train = self.get_ctx("X_train")
 
         print(f">> Fitting {self.algorithm}")

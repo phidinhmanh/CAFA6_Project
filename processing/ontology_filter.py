@@ -26,7 +26,7 @@ class OntologyFilter(BaseStep):
         valid_tax = self._build_tax_rules()
         test_tax = self._load_test_tax()
 
-        df = self.read_tsv(self.get_input_path())
+        df = self.read_tsv(self.get_ctx("prediction_path"))
 
         rows = []
         for pid, group in tqdm(df.groupby("id")):
