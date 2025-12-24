@@ -43,4 +43,6 @@ pipeline:
     class: "Merge"
     params:
       method: "max"
-    blast_path: "submission.tsv"
+      merge_path: "submission.tsv"
+    extra_predictions:
+      - "submission.tsv"   # BLAST

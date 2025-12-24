@@ -16,7 +16,7 @@ class SequenceProcessor(BaseStep):
         self.dimensions = dimensions
 
     def execute(self):
-        train_seqs = self._load_fasta("train_sequences")
+        train_seqs = self._load_fasta("train_sequences.fasta")
         test_seqs = self._load_fasta("testsuperset.fasta")
 
         train_ids = list(train_seqs.keys())

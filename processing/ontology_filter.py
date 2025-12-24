@@ -74,7 +74,7 @@ class OntologyFilter(BaseStep):
 
     def _load_test_tax(self):
         df = pd.read_csv(
-            DataPaths.get("test_taxonomy"),
+            DataPaths.get("testsuperset-taxon-list.tsv"),
             sep="\t",
             names=["id", "tax"],
         )

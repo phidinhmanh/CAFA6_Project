@@ -1,5 +1,5 @@
-# models/base.py
 from abc import ABC, abstractmethod
+from pathlib import Path
 import pandas as pd
 
 
@@ -8,9 +8,13 @@ class BaseStep(ABC):
     Base class cho mọi pipeline step
     """
 
-    step_name: str = None  # type: ignore
+    step_name: str | None = None
 
-    produces = []  # context keys mà step tạo ra
+    # context keys mà step tạo ra
+    produces: list[str] = []
+
+    # nếu step tạo file output → khai báo ở đây
+    output_file_key: str | None = None  # vd: "prediction_path"
 
     def run(self, context: dict, config: dict) -> dict:
         self.context = context or {}
@@ -21,11 +25,40 @@ class BaseStep(ABC):
             return self.context
 
         print(f"\n=== RUNNING STEP: {self.step_name or self.__class__.__name__} ===")
-        return self.execute() or self.context
+        out = self.execute() or {}
+        self.context.update(out)
+        return self.context
 
+    # ===============================
+    # SKIP LOGIC (FIX Ở ĐÂY)
+    # ===============================
     def _already_done(self) -> bool:
-        return self.produces and all(k in self.context for k in self.produces)
+        """
+        Step được coi là DONE nếu:
+        - output_file_key tồn tại trong context
+        - file đó tồn tại trên disk
+        """
+        if not self.output_file_key:
+            return False
 
+        path = self.context.get(self.output_file_key)
+        if not path:
+            return False
+
+        p = Path(path)
+        if not p.exists():
+            return False
+
+        # CRITICAL RULE:
+        # submission.tsv KHÔNG được dùng để skip step trung gian
+        if p.name == "submission.tsv":
+            return False
+
+        return True
+
+    # ===============================
+    # ABSTRACT
+    # ===============================
     @abstractmethod
     def execute(self) -> dict:
         pass
@@ -51,10 +84,8 @@ class BaseStep(ABC):
             f.writelines(rows)
         return path
 
+    # ---------- prediction helpers ----------
     def get_input_path(self):
-        """
-        Chuẩn hoá input prediction path
-        """
         return self.get_ctx("prediction_path")
 
     def set_output_path(self, path):
