@@ -67,7 +67,7 @@ class SklearnWrapper(BaseStep):
 
             norm = sum(weights)
             for t, s in scores.items():
-                prob = s / norm
+                prob = (s / norm) **1.5
                 if prob > 0.01:
                     output.append(f"{test_ids[i]}\t{t}\t{prob:.3f}\n")  # type: ignore
 

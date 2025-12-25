@@ -33,7 +33,7 @@ pipeline:
     class: "Merge"
     params:
       method: "max"
-      merge_path: "submission.tsv"      - "submission.tsv"   # BLAST
+      merge_path: "submission.tsv" 
   # Bước 3: Ontology Filter
   ontology_filter:
     module: "processing.ontology_filter"
