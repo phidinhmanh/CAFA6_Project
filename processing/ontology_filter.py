@@ -47,7 +47,7 @@ class OntologyFilter(BaseStep):
     # ===============================
     def _load_ontology(self):
         graph = obonet.read_obo(DataPaths.get("go-basic.obo"))
-        return {n: set(nx.descendants(graph, n)) for n in graph.nodes()}
+        return {n: set(graph.successors(n)) for n in graph.nodes()}
 
     def _build_tax_rules(self):
         tax = pd.read_csv(
